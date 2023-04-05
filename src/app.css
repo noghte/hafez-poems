@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: Vazirmatn;
+        font-weight: 400;
+        src: url(/fonts/webfonts/Vazirmatn-Black.woff2) format("woff");
+    }
+
+    @font-face {
+        font-family: Vazirmatn;
+        font-weight: 500;
+        src: url(/fonts/webfonts/Vazirmatn-Bold.woff2) format("woff");
+    }
+    html {
+        font-family: Vazirmatn, Tahoma, sans-serif;
+      }
+}
