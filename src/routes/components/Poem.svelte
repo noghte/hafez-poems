@@ -1,34 +1,34 @@
 <script>
-	export let items = [];
+	// export let items = [];
+	export let data = null;
+
 </script>
 
+  
+
 <main class="flex flex-row justify-between">
-	{#if items.length === 0}
-		<p>حافظ سرش جای دیگه گرمه</p>
+	{#if data === null || data.poem.length === 0}
+		<p> در حال بارگزاری ...  </p>
 	{:else}
-			<div class="w-1/2">
-				<!-- <h1 class="text-center">Right Column</h1> -->
-				<ul>
-					{#each items.filter((item) => item.position === 0) as item}
-						<li>
-							<!-- <strong>ID:</strong> {item.poem_id}  -->
-							<!-- <strong>vorder:</strong> {item.vorder}  -->
-							{item.text}
-						</li>
-					{/each}
-				</ul>
-			</div>
-			<div class="w-1/2">
-				<!-- <h1 class="text-center">Left Column</h1> -->
-				<ul>
-					{#each items.filter((item) => item.position === 1) as item}
-						<li>
-							<!-- <strong>ID:</strong> {item.poem_id}  -->
-							<!-- <strong>vorder:</strong> {item.vorder}  -->
-							{item.text}
-						</li>
-					{/each}
-				</ul>
-			</div>
+	
+	<div class="container mx-auto p-4">
+		{#each data.poem as item, index}
+		  <div class="grid grid-cols-1">
+			{#if index % 2 === 0}
+				<div class="pb-0">
+				  <p class="text-lg">{item.text}</p>
+				</div>
+			{/if}
+			{#if index % 2 === 1}
+				<div class="pb-4">
+				  <p class="text-lg">{item.text}</p>
+				</div>
+			{/if}
+		  </div>
+		{/each}
+	  </div>
+	  
+		<!-- write items.length in console -->
+			
 	{/if}
 </main>
