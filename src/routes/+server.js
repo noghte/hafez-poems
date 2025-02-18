@@ -2,9 +2,9 @@ import { json, error } from "@sveltejs/kit";
 import Database from "better-sqlite3";
 import fs from "node:fs";
 
+export function GET(req) {
 
-export function GET({ url }) {
-
+  const url = new URL(req.url);
   let poem_id = url.searchParams.get('pid');   // Getting poem_id as integer from query string
   if (isNaN(poem_id)) {
     throw error(401, "poem_id is mandatory and must be an integer");
@@ -43,15 +43,23 @@ export function GET({ url }) {
   // const result = hafezDb.prepare(query).run({poem_id: poem_id}).all();
   let poemVerses = db.prepare(query).all();
   // const result = json(stmt).all();
+
   const result = {
     poem: poemVerses,
     poet: poet,
     poem_id: poemVerses[0].poem_id,
     request_time: new Date().toISOString(),
-    request_ip: url.ip,
-  }
-  console.log("Time:", result.request_time, "Poet:", result.poet, "Poem:", result.poem_id, "IP:",result.request_ip);
+  };
+  console.log(result.poem_id, result.request_time);
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*' //req.headers && req.headers['origin'] ? req.headers['origin'] : ''
+  };
   return json(result);
-
+  // return {
+  //   status: 200,
+  //   headers,
+  //   body: json(result)
+  // };
 
 }

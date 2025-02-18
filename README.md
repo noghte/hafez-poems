@@ -11,16 +11,24 @@ Displaying a random poem from Hafez's Divan, written in Svelte as a serverless a
 
 ## Deploying the app
 
+First, build the app by running `npm run build`.
+
 ### Netlify
 Look at the [Netlify docs](https://docs.netlify.com/integrations/frameworks/sveltekit/#deployment) for deploying SvelteKit apps on Netlify.
 
 In a nutshell, the `@sveltejs/adapter-netlify` is already configured in the `svelte.config.js` file, and the configuration for Netlify is in the `netlify.toml` file.
 
+
+
 ### Virtual Machines
-- Copy the contents of the `build` folder to your server.
-- Copy package.json and package-lock.json to the server.
-- Run `npm install --omit=dev` on the server.
+Copy the build:
+- `scp -r ./build/*  package.json ecosystem.config.cjs USERNAME@SERVER:/var/www/poems.farsi.rocks`
+Copy dbs:
+- `scp -r ./dbs USERNAME@SERVER:/var/www/poems.farsi.rocks`
 - Change contents of `ecosystem.config.cjs` to your needs.
     - PORT number should match the port you are using in nginx or any other reverse proxy.
 - Run `pm2 start ecosystem.config.cjs` to start the app.
-- On ther server, use pm2 or any other process manager to run the app.
+- 
+# Resources
+
+- https://awesome-svelte-and-d3.netlify.app/

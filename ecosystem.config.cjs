@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
       {
-        name: 'hafez-app',
+        name: 'hafez-app-farsirocks',
         script: './index.js',
         watch: false,
         ignore_watch: ['node_modules'],

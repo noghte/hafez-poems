@@ -22,9 +22,11 @@
 		try {
 			const response = await fetch(url);
 			data = await response.json();
+			console.log(data)
 			let poemId = data.poem_id;
 			currPoemUrl = `${$page.url.origin}/?poet=${poet}&pid=${poemId}`;
 			console.log(currPoemUrl);
+
 			// updateInfo(poet);
 		} catch (error) {
 			console.error(error);
@@ -32,7 +34,7 @@
 		}
 	}
 	onMount(() => {
-		//http://localhost:5173/?poet=hafez&pid=2483
+		//http://localhost:5174/?poet=hafez&pid=2483
 		const params = new URLSearchParams($page.url.search);
 		selectedPoet = params.get('poet') || 'hafez';
 		let poemId = params.get('pid') || -1;
@@ -60,7 +62,7 @@
 
 <svelte:head>
 	<meta name="description" content={description} />
-	<title>-</title>
+	<title>فال شعرا</title>
 </svelte:head>
 
 
@@ -81,6 +83,7 @@
 		<option value="attar">عطار</option>
 		<option value="khayyam">خیام</option>
 		<option value="bahar">بهار</option>
+		<option value="parvin">پروین</option>
 		<option value="bidel">بیدل</option>
 		<option value="jami">جامی</option>
 		<option value="saeb">سائب</option>

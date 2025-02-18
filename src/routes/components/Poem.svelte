@@ -7,7 +7,7 @@
   
 
 <main class="flex flex-row justify-between">
-	{#if data === null || data.poem.length === 0}
+	{#if data === null || data.poem === undefined || data.poem.length === 0}
 		<p> در حال بارگزاری ...  </p>
 	{:else}
 	
