@@ -1,60 +1,62 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import Poem from './components/Poem.svelte';
     import info from '$lib/info';
 	import { get } from 'svelte/store';
 	import { goto } from "$app/navigation";
 	import { page } from "$app/stores"; 
-	const description = 'A random peom';
+	import { fetchPoem } from '$lib/services/poemService';
+	const description = 'یک فال شعر تصادفی';
 
 	let data;
+	let isLoading = false;
+	let error: string | null = null;
 	let currPoemUrl = '';
 	let selectedPoet = 'hafez';
 	$: $info = selectedPoet;
 
-	function handlePoetChange(event) {
+	async function handlePoetChange(event) {
 		selectedPoet = event.target.value;
-		fetchData(selectedPoet, -1);
+		await loadPoem(selectedPoet, -1);
 	}
-	async function fetchData(poet, pid)
-	{
-		const url = `?poet=${poet}&pid=${pid}`;
-		try {
-			const response = await fetch(url);
-			data = await response.json();
-			console.log(data)
-			let poemId = data.poem_id;
-			currPoemUrl = `${$page.url.origin}/?poet=${poet}&pid=${poemId}`;
-			console.log(currPoemUrl);
 
-			// updateInfo(poet);
-		} catch (error) {
-			console.error(error);
-			// handle error
+	async function loadPoem(poet: string, pid: number) {
+		isLoading = true;
+		error = null;
+		
+		try {
+			data = await fetchPoem(poet, pid);
+			currPoemUrl = `${$page.url.origin}/?poet=${poet}&pid=${data.poem_id}`;
+		} catch (err) {
+			error = 'خطا در دریافت شعر';
+			console.error(err);
+		} finally {
+			isLoading = false;
 		}
 	}
-	onMount(() => {
-		//http://localhost:5174/?poet=hafez&pid=2483
+
+	onMount(async () => {
 		const params = new URLSearchParams($page.url.search);
 		selectedPoet = params.get('poet') || 'hafez';
-		let poemId = params.get('pid') || -1;
-		fetchData(selectedPoet, poemId);
-		goto("/"); // to remove the query string from the url, so next poem does not show an incorrect value
+		const poemId = Number(params.get('pid')) || -1;
+		await loadPoem(selectedPoet, poemId);
+		goto("/", { replaceState: true });
 	});
+
 	function buttonClicked(id) {
 		// if (id === 'btnNext') {
 		// 	poem_id++;
 		// } else {
 		// 	poem_id--;
 		// }
-		fetchData(selectedPoet, -1);
+		loadPoem(selectedPoet, -1);
 	}
 	const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(currPoemUrl);
       alert("آدرس شعر در حافظه کپی شد.");
     } catch (err) {
-      alert("failed to copy!");
+      alert("کپی کردن با خطا مواجه شد!");
     }
   };
   
@@ -67,6 +69,44 @@
 
 
 <main class="w-[95%] max-w-2xl mx-auto mt-4">
+	<div class="flex justify-between items-center mb-4">
+		<select 
+			id="drpPoets"
+			on:change={handlePoetChange}
+			bind:value={selectedPoet}
+			class="appearance-none w-40 bg-gray-200 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded focus:outline-none focus:bg-white focus:border-gray-500"
+			aria-label="انتخاب شاعر"
+		>
+			<option value="hafez">حافظ</option>
+			<option value="saadi">سعدی</option>
+			<option value="moulavi">مولوی</option>
+			<option value="attar">عطار</option>
+			<option value="khayyam">خیام</option>
+			<option value="bahar">بهار</option>
+			<option value="parvin">پروین</option>
+			<option value="bidel">بیدل</option>
+			<option value="jami">جامی</option>
+			<option value="saeb">سائب</option>
+			<option value="vahshi">وحشی</option>
+		</select>
+
+		<button 
+			type="button"
+			on:click={() => loadPoem(selectedPoet, -1)}
+			class="p-2 bg-gray-800 text-white rounded-md hover:bg-red-700 px-3 flex items-center"
+			disabled={isLoading}
+		>
+			<span>شعری دیگر</span>
+			{#if isLoading}
+				<span class="mr-2">...</span>
+			{/if}
+		</button>
+	</div>
+
+	{#if error}
+		<div class="text-red-600 text-center my-4" role="alert">{error}</div>
+	{/if}
+
 	<!-- <button id="btnPrev" type="button" on:click={() => buttonClicked(event.target.id)} class="float-right p-2 bg-gray-800 text-white rounded-l-md border-r border-gray-100 py-2 hover:bg-red-700 hover:text-white px-3">
 		<div class="flex align-middle">
 	
@@ -76,7 +116,7 @@
 		  <p class="ml-2">شعر قبلی</p>
 		</div>
 	  </button> -->
-	<select id="drpPoets" on:change={handlePoetChange} bind:value={selectedPoet} class="appearance-none w-40 bg-gray-200 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded focus:outline-none focus:bg-white focus:border-gray-500">
+	<!-- <select id="drpPoets" on:change={handlePoetChange} bind:value={selectedPoet} class="appearance-none w-40 bg-gray-200 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded focus:outline-none focus:bg-white focus:border-gray-500">
 		<option value="hafez">حافظ</option>
 		<option value="saadi">سعدی</option>
 		<option value="moulavi">مولوی</option>
@@ -120,12 +160,25 @@
         placeholder="Search"
         bind:value
       /> -->
-	<Poem {data} />
-	<input type="text" style="direction:ltr"  class="p-2 w-1/2" bind:value={currPoemUrl} readonly />
-	<button id="btnNext" type="button" on:click={copyToClipboard} class="p-2 bg-gray-800 text-white rounded-l-md border-r border-gray-100 py-2 hover:bg-red-700 hover:text-white px-3">
-		<div class="flex align-middle">
-		  <p class="ml-2">کپی</p>
+	{#if data}
+		<Poem {data} />
+		
+		<div class="flex items-center justify-center gap-2 mt-4">
+			<input
+				type="text"
+				style="direction:ltr"
+				class="p-2 w-1/2"
+				bind:value={currPoemUrl}
+				readonly
+				aria-label="آدرس شعر"
+			/>
+			<button
+				type="button"
+				on:click={copyToClipboard}
+				class="p-2 bg-gray-800 text-white rounded-md hover:bg-red-700 px-3"
+			>
+				کپی
+			</button>
 		</div>
-	  </button>
-
+	{/if}
 </main>
