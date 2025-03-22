@@ -13,11 +13,34 @@ export interface PoemResponse {
 }
 
 export async function fetchPoem(poet: string, pid: number): Promise<PoemResponse> {
-    const response = await fetch(`?poet=${poet}&pid=${pid}`);
+    console.log(`Fetching poem: poet=${poet}, pid=${pid}`);
+    const url = `/api/poems?poet=${poet}&pid=${pid}`;
+    
+    const options = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    };
+    
+    const response = await fetch(url, options);
     
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`API error: ${response.status} ${response.statusText}`);
+        
+        // Enhanced error object
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        error.status = response.status;
+        throw error;
     }
     
-    return await response.json();
-} 
+    try {
+        const data = await response.json();
+        console.log('Poem data received:', data);
+        return data;
+    } catch (err) {
+        console.error('JSON parsing error:', err);
+        throw new Error('Error parsing response data');
+    }
+}

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Poem from './components/Poem.svelte';
-    import info from '$lib/info';
+	import info from '$lib/info';
 	import { get } from 'svelte/store';
-	import { goto } from "$app/navigation";
-	import { page } from "$app/stores"; 
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { fetchPoem } from '$lib/services/poemService';
 	const description = 'یک فال شعر تصادفی';
 
@@ -23,13 +23,22 @@
 	async function loadPoem(poet: string, pid: number) {
 		isLoading = true;
 		error = null;
-		
+
 		try {
+			console.log(`Attempting to load poem for ${poet}, id=${pid}`);
 			data = await fetchPoem(poet, pid);
+
+			// Validate data structure
+			if (!data || !data.poem || !Array.isArray(data.poem)) {
+				console.error('Invalid data structure received:', data);
+				error = 'ساختار داده نامعتبر است';
+				return;
+			}
+
 			currPoemUrl = `${$page.url.origin}/?poet=${poet}&pid=${data.poem_id}`;
 		} catch (err) {
-			error = 'خطا در دریافت شعر';
-			console.error(err);
+			console.error('Error in loadPoem:', err);
+			error = `خطا در دریافت شعر: ${err.message}`;
 		} finally {
 			isLoading = false;
 		}
@@ -40,7 +49,7 @@
 		selectedPoet = params.get('poet') || 'hafez';
 		const poemId = Number(params.get('pid')) || -1;
 		await loadPoem(selectedPoet, poemId);
-		goto("/", { replaceState: true });
+		goto('/', { replaceState: true });
 	});
 
 	function buttonClicked(id) {
@@ -52,14 +61,13 @@
 		loadPoem(selectedPoet, -1);
 	}
 	const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(currPoemUrl);
-      alert("آدرس شعر در حافظه کپی شد.");
-    } catch (err) {
-      alert("کپی کردن با خطا مواجه شد!");
-    }
-  };
-  
+		try {
+			await navigator.clipboard.writeText(currPoemUrl);
+			alert('آدرس شعر در حافظه کپی شد.');
+		} catch (err) {
+			alert('کپی کردن با خطا مواجه شد!');
+		}
+	};
 </script>
 
 <svelte:head>
@@ -67,10 +75,9 @@
 	<title>فال شعرا</title>
 </svelte:head>
 
-
 <main class="w-[95%] max-w-2xl mx-auto mt-4">
 	<div class="flex justify-between items-center mb-4">
-		<select 
+		<select
 			id="drpPoets"
 			on:change={handlePoetChange}
 			bind:value={selectedPoet}
@@ -90,7 +97,7 @@
 			<option value="vahshi">وحشی</option>
 		</select>
 
-		<button 
+		<button
 			type="button"
 			on:click={() => loadPoem(selectedPoet, -1)}
 			class="p-2 bg-gray-800 text-white rounded-md hover:bg-red-700 px-3 flex items-center"
@@ -151,7 +158,30 @@
 
 	</h1> -->
 	<!-- <hr /> based on https://www.svgrepo.com/svg/110692/horizontal-line?edit=true-->
-	<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="w-full" height="93px" viewBox="-29.07 -29.07 348.80 348.80" xml:space="preserve" fill="#310a6b" stroke="#310a6b" stroke-width="1.162632"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.581316"></g><g id="SVGRepo_iconCarrier"> <g> <g> <rect y="139.474" style="fill:#030303;" width="290.658" height="11.711"></rect> </g> </g> </g></svg>
+	<svg
+		version="1.1"
+		id="Capa_1"
+		xmlns="http://www.w3.org/2000/svg"
+		xmlns:xlink="http://www.w3.org/1999/xlink"
+		class="w-full"
+		height="93px"
+		viewBox="-29.07 -29.07 348.80 348.80"
+		xml:space="preserve"
+		fill="#310a6b"
+		stroke="#310a6b"
+		stroke-width="1.162632"
+		><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
+			id="SVGRepo_tracerCarrier"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke="#CCCCCC"
+			stroke-width="0.581316"
+		></g><g id="SVGRepo_iconCarrier">
+			<g>
+				<g> <rect y="139.474" style="fill:#030303;" width="290.658" height="11.711"></rect> </g>
+			</g>
+		</g></svg
+	>
 	<!-- <p>Search for Hafez below</p>
       <input
         class="p-2"
@@ -162,7 +192,7 @@
       /> -->
 	{#if data}
 		<Poem {data} />
-		
+
 		<div class="flex items-center justify-center gap-2 mt-4">
 			<input
 				type="text"
