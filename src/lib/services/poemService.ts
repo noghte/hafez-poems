@@ -37,7 +37,7 @@ export async function fetchPoem(poet: string, pid: number): Promise<PoemResponse
     
     try {
         const data = await response.json();
-        console.log('Poem data received:', data);
+        // console.log('Poem data received:', data);
         return data;
     } catch (err) {
         console.error('JSON parsing error:', err);

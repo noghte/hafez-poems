@@ -21,7 +21,7 @@ export default defineConfig({
             clientPort: 5174
         },
         fs: {
-            allow: ['assets']
+            allow: ['static']
         }
     }
 });
